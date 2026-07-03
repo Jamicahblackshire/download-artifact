@@ -1,13 +1,21 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "ES2020",
     "module": "commonjs",
+    "lib": ["ES2020"],
     "outDir": "./lib",
     "rootDir": "./src",
     "strict": true,
     "noImplicitAny": false,
     "moduleResolution": "node",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
   },
-  "exclude": ["node_modules", "**/*.test.ts"]
+  "include": ["src/**/*.ts", "e2b.config.ts"],
+  "exclude": ["node_modules", "**/*.test.ts", "lib"]
 }
