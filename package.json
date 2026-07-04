@@ -9,7 +9,8 @@
     "check-all": "concurrently \"npm:format-check\" \"npm:lint\" \"npm:build\"",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
-    "lint": "eslint **/*.ts"
+    "lint": "eslint **/*.ts",
+    "max:terminal": "node src/max-core/terminal-runner.cjs"
   },
   "repository": {
     "type": "git",
