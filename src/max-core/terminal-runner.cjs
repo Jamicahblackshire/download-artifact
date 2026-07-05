@@ -6,8 +6,12 @@ const fs = require("fs");
 const path = require("path");
 
 let currentDir = process.cwd();
+let currentMode = "SAFE";
 
 const LOG_FILE = path.join(process.cwd(), "docs/ffs/memory/COMMAND_LOG.md");
+const MODE_LOG_FILE = path.join(process.cwd(), "docs/ffs/memory/MODE_LOG.md");
+
+const VALID_MODES = ["SAFE", "ARMED", "LOCKDOWN"];
 
 const CRITICAL_PATTERNS = [
   /rm\s+-rf\s+\//i,
@@ -86,24 +90,22 @@ function inspectCommand(command) {
   };
 }
 
-function ensureLogFile() {
-  const dir = path.dirname(LOG_FILE);
+function ensureFile(file, title) {
+  const dir = path.dirname(file);
   fs.mkdirSync(dir, { recursive: true });
 
-  if (!fs.existsSync(LOG_FILE)) {
-    fs.writeFileSync(
-      LOG_FILE,
-      "# Max Core Command Log\n\nThis file records Max Core terminal runner activity.\n\n"
-    );
+  if (!fs.existsSync(file)) {
+    fs.writeFileSync(file, `# ${title}\n\n`);
   }
 }
 
 function logAction(command, decision, status) {
-  ensureLogFile();
+  ensureFile(LOG_FILE, "Max Core Command Log");
 
   const entry = [
     `## ${new Date().toISOString()}`,
     "",
+    `- Mode: ${currentMode}`,
     `- Command: \`${command.replace(/`/g, "\\`")}\``,
     `- Risk: ${decision.risk}`,
     `- Status: ${status}`,
@@ -114,17 +116,44 @@ function logAction(command, decision, status) {
   fs.appendFileSync(LOG_FILE, entry);
 }
 
+function logModeChange(previousMode, newMode, reason) {
+  ensureFile(MODE_LOG_FILE, "Max Core Mode Log");
+
+  const entry = [
+    `## ${new Date().toISOString()}`,
+    "",
+    `- Previous Mode: ${previousMode}`,
+    `- New Mode: ${newMode}`,
+    `- Reason: ${reason}`,
+    "",
+  ].join("\n");
+
+  fs.appendFileSync(MODE_LOG_FILE, entry);
+}
+
 function showHelp() {
   console.log(`
 Max Core Terminal Runner
 
+Current mode: ${currentMode}
+
 Commands:
-  help                 Show this help menu
-  exit                 Close Max Core
-  pwd                  Show current working directory
-  cd <path>            Change working directory
-  risk <command>       Inspect command risk without running it
-  log                  Show command log path
+  help                         Show this help menu
+  exit                         Close Max Core
+  pwd                          Show current working directory
+  cd <path>                    Change working directory
+  risk <command>               Inspect command risk without running it
+  mode                         Show current operation mode
+  set-mode SAFE                Switch to SAFE MODE
+  set-mode ARMED               Switch to ARMED MODE
+  set-mode LOCKDOWN            Switch to LOCKDOWN MODE
+  log                          Show command log path
+  mode-log                     Show mode log path
+
+Mode rules:
+  SAFE MODE     Low/Medium commands allowed. High/Critical blocked.
+  ARMED MODE    Low/Medium allowed. High/Critical require approval phrase.
+  LOCKDOWN MODE No external command execution.
 
 Approval phrases:
   APPROVED: EXECUTE HIGH RISK
@@ -132,17 +161,52 @@ Approval phrases:
 `);
 }
 
+function setMode(mode) {
+  const nextMode = mode.toUpperCase();
+
+  if (!VALID_MODES.includes(nextMode)) {
+    console.log(`Invalid mode: ${mode}`);
+    console.log("Valid modes: SAFE, ARMED, LOCKDOWN");
+    return;
+  }
+
+  if (nextMode === currentMode) {
+    console.log(`Already in ${currentMode} MODE.`);
+    return;
+  }
+
+  const previousMode = currentMode;
+  currentMode = nextMode;
+
+  console.log(`Mode changed: ${previousMode} -> ${currentMode}`);
+  logModeChange(previousMode, currentMode, "Owner command through terminal runner");
+}
+
 function runCommand(command) {
   const decision = inspectCommand(command);
 
+  console.log(`[MODE] ${currentMode}`);
   console.log(`[RISK] ${decision.risk.toUpperCase()}`);
   console.log(`[REASON] ${decision.reason}`);
+
+  if (currentMode === "LOCKDOWN") {
+    console.log("Blocked. LOCKDOWN MODE does not allow external command execution.");
+    logAction(command, decision, "blocked-lockdown");
+    return prompt();
+  }
+
+  if (currentMode === "SAFE" && (decision.risk === "high" || decision.risk === "critical")) {
+    console.log("Blocked. SAFE MODE does not allow High or Critical risk execution.");
+    console.log("Switch to ARMED MODE first if this action is truly needed.");
+    logAction(command, decision, "blocked-safe-mode");
+    return prompt();
+  }
 
   if (decision.requiresApproval) {
     rl.question(`Approval required. Type "${decision.phrase}" to continue: `, (answer) => {
       if (answer !== decision.phrase) {
         console.log("Blocked. Approval phrase did not match.");
-        logAction(command, decision, "blocked");
+        logAction(command, decision, "blocked-approval-failed");
         return prompt();
       }
 
@@ -178,7 +242,7 @@ const rl = readline.createInterface({
 });
 
 function prompt() {
-  rl.question("Max> ", (input) => {
+  rl.question(`Max:${currentMode}> `, (input) => {
     const command = input.trim();
 
     if (!command) return prompt();
@@ -199,9 +263,25 @@ function prompt() {
       return prompt();
     }
 
+    if (command === "mode") {
+      console.log(currentMode);
+      return prompt();
+    }
+
     if (command === "log") {
-      ensureLogFile();
+      ensureFile(LOG_FILE, "Max Core Command Log");
       console.log(LOG_FILE);
+      return prompt();
+    }
+
+    if (command === "mode-log") {
+      ensureFile(MODE_LOG_FILE, "Max Core Mode Log");
+      console.log(MODE_LOG_FILE);
+      return prompt();
+    }
+
+    if (command.startsWith("set-mode ")) {
+      setMode(command.slice(9).trim());
       return prompt();
     }
 
@@ -230,5 +310,6 @@ function prompt() {
 }
 
 console.log("Max Core Terminal Runner online.");
+console.log("Default mode: SAFE");
 console.log("Type `help` for commands.");
 prompt();
