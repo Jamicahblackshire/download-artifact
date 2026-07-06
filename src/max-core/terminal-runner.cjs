@@ -4,6 +4,7 @@ const readline = require("readline");
 const { exec } = require("child_process");
 const fs = require("fs");
 const path = require("path");
+const os = require("os");
 
 let currentDir = process.cwd();
 let currentMode = "SAFE";
@@ -131,6 +132,19 @@ function logModeChange(previousMode, newMode, reason) {
   fs.appendFileSync(MODE_LOG_FILE, entry);
 }
 
+
+function expandPath(target) {
+  if (!target || target === "~") {
+    return os.homedir();
+  }
+
+  if (target.startsWith("~/")) {
+    return path.join(os.homedir(), target.slice(2));
+  }
+
+  return target;
+}
+
 function showHelp() {
   console.log(`
 Max Core Terminal Runner
@@ -221,7 +235,7 @@ function runCommand(command) {
 function execute(command, decision) {
   console.log(`[EXECUTING] ${command}`);
 
-  exec(command, { cwd: currentDir }, (error, stdout, stderr) => {
+  exec(command, { cwd: currentDir, shell: "/bin/bash" }, (error, stdout, stderr) => {
     if (stdout) console.log(stdout.trim());
     if (stderr) console.error(stderr.trim());
 
@@ -286,8 +300,8 @@ function prompt() {
     }
 
     if (command.startsWith("cd ")) {
-      const target = command.slice(3).trim();
-      const nextDir = path.resolve(currentDir, target);
+      const target = expandPath(command.slice(3).trim());
+      const nextDir = path.isAbsolute(target) ? target : path.resolve(currentDir, target);
 
       if (!fs.existsSync(nextDir) || !fs.statSync(nextDir).isDirectory()) {
         console.log(`Directory not found: ${nextDir}`);
