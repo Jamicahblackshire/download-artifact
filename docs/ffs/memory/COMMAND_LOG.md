@@ -49,3 +49,59 @@ This file records Max Core terminal runner activity.
 - Risk: low
 - Status: completed
 - Reason: Low-risk command allowed.
+## 2026-07-05T00:28:57.881Z
+
+- Mode: SAFE
+- Command: `npm run max:task`
+- Risk: low
+- Status: completed
+- Reason: Low-risk command allowed.
+## 2026-07-06T21:30:06.587Z
+
+- Mode: SAFE
+- Command: `Max Core Terminal Runner online.`
+- Risk: low
+- Status: error
+- Reason: Low-risk command allowed.
+## 2026-07-06T21:30:07.473Z
+
+- Mode: SAFE
+- Command: `Max:SAFE>`
+- Risk: low
+- Status: error
+- Reason: Low-risk command allowed.
+## 2026-07-06T21:31:50.212Z
+
+- Mode: SAFE
+- Command: `npm run max:task`
+- Risk: low
+- Status: completed
+- Reason: Low-risk command allowed.
+## 2026-07-06T21:32:59.526Z
+
+- Mode: SAFE
+- Command: `npm run max:task`
+- Risk: low
+- Status: completed
+- Reason: Low-risk command allowed.
+## 2026-07-06T21:33:33.048Z
+
+- Mode: SAFE
+- Command: `feature/max-core-command-registry`
+- Risk: low
+- Status: error
+- Reason: Low-risk command allowed.
+## 2026-07-06T21:35:05.297Z
+
+- Mode: SAFE
+- Command: `pending → approved → running → completed`
+- Risk: low
+- Status: error
+- Reason: Low-risk command allowed.
+## 2026-07-06T21:35:12.771Z
+
+- Mode: SAFE
+- Command: `pending → blocked → failed`
+- Risk: low
+- Status: error
+- Reason: Low-risk command allowed.
