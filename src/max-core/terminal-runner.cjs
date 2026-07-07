@@ -145,6 +145,43 @@ function expandPath(target) {
   return target;
 }
 
+
+function getRepoStatus() {
+  function run(cmd) {
+    try {
+      return require("child_process").execSync(cmd, {
+        cwd: currentDir,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+        shell: "/bin/bash",
+      }).trim();
+    } catch {
+      return "";
+    }
+  }
+
+  const branch = run("git branch --show-current") || "unknown";
+  const shortStatus = run("git status --short");
+  const lastCommit = run("git log --oneline -1") || "unknown";
+
+  console.log("");
+  console.log("MAX CORE STATUS");
+  console.log("");
+  console.log(`Mode: ${currentMode}`);
+  console.log(`Directory: ${currentDir}`);
+  console.log(`Branch: ${branch}`);
+  console.log(`Git: ${shortStatus ? "Dirty" : "Clean"}`);
+  console.log(`Last Commit: ${lastCommit}`);
+
+  if (shortStatus) {
+    console.log("");
+    console.log("Changes:");
+    console.log(shortStatus);
+  }
+
+  console.log("");
+}
+
 function showHelp() {
   console.log(`
 Max Core Terminal Runner
@@ -158,6 +195,7 @@ Commands:
   cd <path>                    Change working directory
   risk <command>               Inspect command risk without running it
   mode                         Show current operation mode
+  status                       Show live repository status
   set-mode SAFE                Switch to SAFE MODE
   set-mode ARMED               Switch to ARMED MODE
   set-mode LOCKDOWN            Switch to LOCKDOWN MODE
@@ -279,6 +317,11 @@ function prompt() {
 
     if (command === "mode") {
       console.log(currentMode);
+      return prompt();
+    }
+
+    if (command === "status") {
+      getRepoStatus();
       return prompt();
     }
 
