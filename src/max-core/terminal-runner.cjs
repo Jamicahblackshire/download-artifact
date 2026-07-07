@@ -182,6 +182,48 @@ function getRepoStatus() {
   console.log("");
 }
 
+
+function reviewRepo() {
+  function run(cmd) {
+    try {
+      return require("child_process").execSync(cmd, {
+        cwd: currentDir,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+        shell: "/bin/bash",
+      }).trim();
+    } catch {
+      return "";
+    }
+  }
+
+  const branch = run("git branch --show-current") || "unknown";
+  const shortStatus = run("git status --short");
+  const lastCommit = run("git log --oneline -1") || "unknown";
+  const upstream = run("git rev-parse --abbrev-ref --symbolic-full-name @{u}");
+  const sync = upstream ? run(`git rev-list --left-right --count ${upstream}...HEAD`) : "";
+
+  console.log("");
+  console.log("MAX CORE REVIEW");
+  console.log("");
+  console.log(`Mode: ${currentMode}`);
+  console.log(`Directory: ${currentDir}`);
+  console.log(`Branch: ${branch}`);
+  console.log(`Git Status: ${shortStatus ? "Dirty" : "Clean"}`);
+  console.log(`Last Commit: ${lastCommit}`);
+  console.log(`Remote Tracking: ${upstream || "No upstream set"}`);
+
+  if (sync) {
+    const [behind, ahead] = sync.split(/\s+/);
+    console.log(`Remote Sync: ${ahead} ahead, ${behind} behind`);
+  }
+
+  console.log("");
+  console.log("Changed Files:");
+  console.log(shortStatus || "None");
+  console.log("");
+}
+
 function showHelp() {
   console.log(`
 Max Core Terminal Runner
@@ -322,6 +364,11 @@ function prompt() {
 
     if (command === "status") {
       getRepoStatus();
+      return prompt();
+    }
+
+    if (command === "review") {
+      reviewRepo();
       return prompt();
     }
 
