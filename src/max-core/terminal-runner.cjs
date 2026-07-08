@@ -9,8 +9,8 @@ const os = require("os");
 let currentDir = process.cwd();
 let currentMode = "SAFE";
 
-const LOG_FILE = path.join(process.cwd(), "docs/ffs/memory/COMMAND_LOG.md");
-const MODE_LOG_FILE = path.join(process.cwd(), "docs/ffs/memory/MODE_LOG.md");
+const LOG_FILE = path.join(process.cwd(), ".runtime/COMMAND_LOG.md");
+const MODE_LOG_FILE = path.join(process.cwd(), ".runtime/MODE_LOG.md");
 
 const VALID_MODES = ["SAFE", "ARMED", "LOCKDOWN"];
 
