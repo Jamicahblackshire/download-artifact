@@ -1,3 +1,4 @@
 .runtime/
 *.swp
 *.swo
+node_modules/
