@@ -12,7 +12,9 @@
     "lint": "eslint **/*.ts",
     "max:terminal": "node src/max-core/terminal-runner.cjs",
     "max:task": "node src/max-core/task-runner.cjs",
-    "max:auto": "node src/max-core/autoworker.cjs"
+    "max:auto": "node src/max-core/autoworker.cjs",
+    "max:v4": "node src/max-core/terminal-runner.cjs",
+    "max": "node src/max-core/terminal-runner.cjs"
   },
   "repository": {
     "type": "git",

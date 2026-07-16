@@ -1,0 +1,1 @@
+{"version":3,"file":"risk-policy.d.ts","sourceRoot":"","sources":["../../../src/safety/risk-policy.ts"],"names":[],"mappings":"AAAA,oBAAY,SAAS,GAAG,KAAK,GAAG,QAAQ,GAAG,MAAM,GAAG,UAAU,CAAC;AAE/D,MAAM,WAAW,cAAc;IAC7B,OAAO,EAAE,OAAO,CAAC;IACjB,IAAI,EAAE,SAAS,CAAC;IAChB,MAAM,EAAE,MAAM,CAAC;IACf,gBAAgB,EAAE,OAAO,CAAC;CAC3B;AAuBD,wBAAgB,cAAc,CAAC,OAAO,EAAE,MAAM,GAAG,cAAc,CAyB9D"}
